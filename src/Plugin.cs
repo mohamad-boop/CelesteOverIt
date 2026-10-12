@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Reflection;
 using BepInEx;
@@ -8,16 +8,16 @@ using UnityEngine.SceneManagement;
 
 namespace CelesteOverIt
 {
-    [BepInPlugin("celesteoverit.madeline", "Celeste Over It", "1.0.0")]
+    [BepInPlugin("celesteoverit.madeline", "Celeste Over It", "1.1.0")]
     public class Plugin : BaseUnityPlugin
     {
         const BindingFlags All = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
 
-        ConfigEntry<bool> modEnabled, infiniteStamina, trails, devAutoStart, devSelfTest, devLogState;
+        ConfigEntry<bool> modEnabled, infiniteStamina, trails, devAutoStart, devSelfTest, devLogState, devTestEnding;
         float devLogTimer;
         bool continuing;
         ConfigEntry<string> celesteDir, keyRespawn, keyJump, keyDash, keyGrab, keyLeft, keyRight, keyUp, keyDown;
-        ConfigEntry<float> pixelSize, zOffset, cameraZoom, sfxVolume, slipAngle, gripTime;
+        ConfigEntry<float> pixelSize, zOffset, cameraZoom, sfxVolume, slipAngle, gripTime, spaceGravity;
         ConfigEntry<int> edgeSupport, maxDashes, slopeStep, ledgeStep, climbContour, ledgeSpacing, surfaceIndex;
         ConfigEntry<bool> sound;
         static CelesteAudio audio;
@@ -40,6 +40,8 @@ namespace CelesteOverIt
                 "Bumps/lips up to this many pixels are walked over when there's level ground behind them.");
             climbContour = Config.Bind("Gameplay", "ClimbContour", 2,
                 "While climbing, Madeline follows a rock face that leans up to this many pixels per pixel climbed (0 = pure Celeste).");
+            spaceGravity = Config.Bind("Gameplay", "SpaceGravity", 0.05f,
+                "Gravity in the space section above the antenna, as a fraction of normal (0.05 = hop asteroid to asteroid; 0 = Getting Over It's own zero-g).");
             gripTime = Config.Bind("Gameplay", "GripTime", 3f,
                 "Seconds Madeline can hold onto a wall before she runs out of grip and slides down (0 = Celeste's normal stamina, about 11s).");
             edgeSupport = Config.Bind("Gameplay", "EdgeSupport", 2,
@@ -68,6 +70,7 @@ namespace CelesteOverIt
             keyUp = Config.Bind("Controls", "Up", "UpArrow,W", "");
             keyDown = Config.Bind("Controls", "Down", "DownArrow,S", "");
             devAutoStart = Config.Bind("Dev", "AutoStart", false, "Skip the title screen (development).");
+            devTestEnding = Config.Bind("Dev", "TestEnding", false, "Launch Madeline into the space ending and log it (development).");
             devLogState = Config.Bind("Dev", "LogState", false, "Log Madeline's state (incl. ground slope) twice a second (development).");
             devSelfTest = Config.Bind("Dev", "SelfTest", false, "Run a scripted movement test and log results (development).");
 
@@ -94,7 +97,7 @@ namespace CelesteOverIt
             if (loader == null) yield break;
             // The self-test needs the real starting rocks, so it always begins a new game.
             bool canContinue = (bool)loader.GetType().GetField("canContinue", All).GetValue(loader);
-            bool cont = canContinue && !devSelfTest.Value;
+            bool cont = canContinue && !devSelfTest.Value && !devTestEnding.Value;
             loader.GetType().GetMethod(cont ? "ContinueGame" : "StartGame", All).Invoke(loader, null);
         }
 
@@ -151,6 +154,7 @@ namespace CelesteOverIt
             if (fakeCursor != null) foreach (var r in fakeCursor.GetComponentsInChildren<Renderer>(true)) r.enabled = false;
             pc.enabled = false;
 
+            float playerMass = rb.mass;
             rb.bodyType = RigidbodyType2D.Kinematic;
             rb.velocity = Vector2.zero;
             rb.angularVelocity = 0;
@@ -175,6 +179,7 @@ namespace CelesteOverIt
             controller.M.ClimbContour = Math.Max(0, climbContour.Value);
             controller.M.SlipAngle = Mathf.Clamp(slipAngle.Value, 0f, 90f);
             controller.M.GripTime = Mathf.Max(0f, gripTime.Value);
+            controller.SpaceGravity = Mathf.Clamp(spaceGravity.Value, 0f, 1f);
             controller.Solids.EdgeSupport = Mathf.Clamp(edgeSupport.Value, 0, 7);
             controller.Zoom = Mathf.Clamp(cameraZoom.Value, 0.5f, 3f);
             // Generated wall ledges (optional) and the level's platforms share one jump-through set.
@@ -203,6 +208,8 @@ namespace CelesteOverIt
             controller.Input.UpKeys = CelesteInput.ParseKeys(keyUp.Value);
             controller.Input.DownKeys = CelesteInput.ParseKeys(keyDown.Value);
             controller.RespawnKeys = CelesteInput.ParseKeys(keyRespawn.Value);
+            controller.PlayerMass = playerMass > 0 ? playerMass : 52f;
+            controller.Log = s => Logger.LogInfo(s);
             controller.Init(rb.position - controller.PlayerOffset);
 
             // Continue: put Madeline back exactly where she last stood. New game: forget it.
@@ -231,6 +238,7 @@ namespace CelesteOverIt
                 MapDump.Write(System.IO.Path.Combine(Paths.BepInExRootPath, "CelesteOverIt_map.txt"), mask);
                 SelfTest.Attach(controller, Logger);
             }
+            else if (devTestEnding.Value) SelfTest.AttachEnding(controller, Logger);
             helpTimer = 10f;
             Logger.LogInfo("Madeline spawned at " + rb.position + " (collision mask " + mask + ")");
         }

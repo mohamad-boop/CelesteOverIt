@@ -195,6 +195,7 @@ namespace CelesteOverIt
             body = MakeRenderer("Body", 10);
 
             M.Sfx = OnSfx;
+            FindGravityControl();
             if (LedgeField != null)
             {
                 LedgeField.OnCreated = CreateLedgeVisual;
@@ -360,6 +361,7 @@ namespace CelesteOverIt
                 accumulator -= StepDt;
                 prevFeet = curFeet;
                 Input.Step(StepDt);
+                ApplyGoiGravity();
                 M.Update(StepDt, Input);
                 StepCount++;
                 TrackSafety(StepDt);
@@ -374,9 +376,90 @@ namespace CelesteOverIt
             UpdateTrails(dt);
         }
 
+        // ---- GOI's ending: the space column above the antenna --------------------------------------------
+        // GravityControl is a big trigger box: entering it turns gravity off (asteroids pull you), leaving it
+        // through the top starts the credits and gravity points gently up. A kinematic body doesn't fire
+        // trigger messages against a static trigger, so we detect enter/exit ourselves and call GOI's handlers.
+        MonoBehaviour gravityControl;
+        BoxCollider2D gravityBox;
+        System.Reflection.MethodInfo gcEnter, gcExit;
+        System.Reflection.FieldInfo gcWells, gcCreditsUp;
+        Collider2D playerCollider;
+        bool inSpace;
+        int playerColliderCount = 1;
+        public float PlayerMass = 52f;
+        public Action<string> Log;
+
+        void FindGravityControl()
+        {
+            var t = Type.GetType("GravityControl, Assembly-CSharp");
+            if (t == null) return;
+            gravityControl = FindObjectOfType(t) as MonoBehaviour;
+            if (gravityControl == null) return;
+            const System.Reflection.BindingFlags all = System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance;
+            gravityBox = gravityControl.GetComponent<BoxCollider2D>();
+            gcEnter = t.GetMethod("OnTriggerEnter2D", all);
+            gcExit = t.GetMethod("OnTriggerExit2D", all);
+            gcWells = t.GetField("gravityWells", all);
+            gcCreditsUp = t.GetField("creditsUp", all);
+            playerCollider = PlayerRb != null ? PlayerRb.GetComponent<Collider2D>() : null;
+            playerColliderCount = 0;
+            if (PlayerRb != null)
+                foreach (var col in PlayerRb.GetComponentsInChildren<Collider2D>())
+                    if (col.enabled && col.attachedRigidbody == PlayerRb) playerColliderCount++;
+            playerColliderCount = Math.Max(1, playerColliderCount);
+            if (Log != null && gravityBox != null)
+                Log("Space zone (GOI ending) at " + gravityBox.bounds.min + " - " + gravityBox.bounds.max);
+        }
+
+        void UpdateSpace()
+        {
+            if (gravityControl == null || gravityBox == null || PlayerRb == null) return;
+            bool inside = gravityBox.OverlapPoint(PlayerRb.position);
+            if (inside != inSpace)
+            {
+                inSpace = inside;
+                var m = inside ? gcEnter : gcExit;
+                if (m != null && playerCollider != null)
+                {
+                    try { m.Invoke(gravityControl, new object[] { playerCollider }); }
+                    catch (Exception e) { if (Log != null) Log("GravityControl call failed: " + e.Message); }
+                }
+                if (Log != null) Log(inside ? "Entered space (zero-g)" : "Left space at y " + PlayerRb.position.y.ToString("0.0") + ", gravity now " + Physics2D.gravity);
+            }
+        }
+
+        /// <summary>Copy GOI's current gravity (and the asteroid pull while in space) onto Madeline.</summary>
+        public float SpaceGravity = 0.05f;   // fraction of normal gravity inside GOI's space zone (GOI itself uses 0)
+
+        void ApplyGoiGravity()
+        {
+            M.GravityScale = -Physics2D.gravity.y / 30f;
+            // GOI turns gravity fully off in space; Madeline gets a little back so she has to hop asteroid to asteroid.
+            bool creditsUp = gcCreditsUp != null && gravityControl != null && (bool)gcCreditsUp.GetValue(gravityControl);
+            if (inSpace && !creditsUp && Physics2D.gravity == Vector2.zero) M.GravityScale = SpaceGravity;
+            var accel = Vector2.zero;
+            if (inSpace && gcWells != null && !(gcCreditsUp != null && (bool)gcCreditsUp.GetValue(gravityControl)))
+            {
+                var wells = gcWells.GetValue(gravityControl) as Transform[];
+                if (wells != null)
+                    foreach (var w in wells)
+                    {
+                        if (w == null) continue;
+                        var d = (Vector2)w.position - PlayerRb.position;
+                        float sq = Mathf.Max(d.sqrMagnitude, 1f);
+                        // GOI: OnTriggerStay2D adds 2500/d^2 once per player collider (Diogenes' body has several)
+                        var a = d.normalized * (2500f * playerColliderCount / sq / PlayerMass);
+                        accel += new Vector2(a.x, -a.y) / Ps;                  // world u/s^2 -> Celeste px/s^2 (y down)
+                    }
+            }
+            M.ExternalAccel = accel;
+        }
+
         void FixedUpdate()
         {
             if (PlayerRb == null) return;
+            UpdateSpace();
             // Detect GOI teleporting its player (save load / reset) and follow it.
             if ((PlayerRb.position - lastPlayerTarget).sqrMagnitude > 1.5f * 1.5f) SyncTo(PlayerRb.position);
             lastPlayerTarget = curFeet + PlayerOffset;

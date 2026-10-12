@@ -20,6 +20,7 @@ Madeline's sprites, animations, hair and sound effects are loaded **at runtime f
   - She can grip a wall for 3 seconds before she slips.
   - Very tall walls get Celeste wooden ledges.
 - **Strawberries and dash-refill crystals**: 5 hidden strawberries, plus a **level editor (F2)** to place your own strawberries, crystals and platforms.
+- **The real ending**: jump off the antenna into the space above it. Getting Over It turns gravity off there; Madeline keeps a little (`SpaceGravity`, 5%), so you hop from asteroid to asteroid. The asteroids pull on her the same way they pull on Diogenes, and green crystals let you chain dashes. Leave through the top to roll the credits.
 - **Getting Over It still works around her**: its camera, autosave/continue, progress meter and narrator all keep working. The original player body is kept (kinematic) and follows Madeline.
 - **Respawn**: F5 takes you to the last safe spot, Shift+F5 to the start. Getting stuck inside rock fixes itself automatically.
 

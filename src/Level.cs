@@ -43,6 +43,14 @@ platform 11.0 58.0 3
 platform 7.0 60.5 2
 strawberry 4 4.5 63.5
 
+# Space: crystals and a ledge from the antenna to the first asteroid, one between the
+# upper asteroids, and one above the last asteroid to dash out to the ending
+refill 62.4 374
+refill 62.6 388
+platform 63.0 397 3
+refill 63.0 452
+refill 42.5 461
+
 # 5  Above the big block
 platform 30.0 83.4 3
 platform 34.5 85.3 2

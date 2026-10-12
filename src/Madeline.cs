@@ -59,6 +59,8 @@ namespace CelesteOverIt
         public int SlopeStep = 2;        // px Madeline may step up/down per px of horizontal motion when grounded
         public int LedgeStep = 4;        // small lips/bumps (with flat ground behind) she walks straight over
         public int ClimbContour = 2;     // px per px she follows a wall that leans in/out while climbing
+        public float GravityScale = 1f;  // follows GOI's Physics2D.gravity: 1 normally, 0 in space, <0 floats up (ending)
+        public Vector2 ExternalAccel;    // px/s^2, Celeste space (y down): GOI's gravity wells in space
         public float GripTime = 3f;      // seconds she can hang on a wall before stamina runs out (0 = Celeste's ~11s)
         public float SlipAngle = 75f;    // ground this steep (or steeper) can't be stood on: she slides off (0 = off)
         public float SlipSpeed = 70f;    // px/s she's pushed downhill while slipping
@@ -358,8 +360,11 @@ namespace CelesteOverIt
                     if (WallSlideDir != 0) max = Mathf.Lerp(MaxFall, WallSlideStartMax, wallSlideTimer / WallSlideTime);
                 }
                 float gmult = (Math.Abs(Speed.y) < HalfGravThreshold && (input.JumpCheck || AutoJump)) ? .5f : 1f;
-                Speed.y = Approach(Speed.y, max, Gravity * gmult * dt);
+                if (GravityScale > 0) Speed.y = Approach(Speed.y, max, Gravity * gmult * GravityScale * dt);
+                else if (GravityScale < 0) Speed.y = Approach(Speed.y, -max, Gravity * -GravityScale * dt);
+                // GravityScale == 0: zero-g (GOI's space). Keep whatever momentum she launched with.
             }
+            if (ExternalAccel != Vector2.zero && !OnGround) Speed += ExternalAccel * dt;
 
             // Variable jumping
             if (varJumpTimer > 0)
@@ -830,6 +835,26 @@ namespace CelesteOverIt
 
         void OnCollideV()
         {
+            if (Speed.y < 0 && Math.Abs(GravityScale) < 0.01f && State != StClimb)
+            {
+                // Zero-g (GOI's space): glance off rock above instead of stopping dead. Slide toward the
+                // nearer way around it and keep the upward momentum, so a launch from the antenna carries
+                // on around the asteroids.
+                for (int i = 1; i <= 24; i++)
+                {
+                    int dir = 0;
+                    bool left = !CollideAt(X - i, Y - 1) && !CollideAt(X - i, Y);
+                    bool right = !CollideAt(X + i, Y - 1) && !CollideAt(X + i, Y);
+                    if (left && right) dir = Speed.x < 0 ? -1 : 1;
+                    else if (left) dir = -1;
+                    else if (right) dir = 1;
+                    if (dir == 0) continue;
+                    float push = Math.Max(40f, -Speed.y * 0.8f);
+                    if (Math.Sign(Speed.x) != dir || Math.Abs(Speed.x) < push) Speed.x = dir * push;
+                    remainder.y = 0;
+                    return;                                   // keep Speed.y: she skims around it
+                }
+            }
             if (Speed.y < 0)
             {
                 // Upward corner correction

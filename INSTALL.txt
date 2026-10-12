@@ -1,6 +1,6 @@
 =====================================================================
   CELESTE OVER IT  -  Madeline climbs Getting Over It's mountain
-  v1.0.0
+  v1.1.0
 =====================================================================
 
 Diogenes is replaced by Madeline from Celeste, with Celeste's own movement:
@@ -18,6 +18,10 @@ Extras:
  - Climbing follows slanted rock faces, and she tilts to match the wall
  - Celeste wooden ledges are added to very tall walls
  - 5 hidden strawberries in the sky, plus green dash-refill crystals
+ - The real ending works: climb the antenna at the top of the snowy area,
+   then jump into the low-gravity space above it. Hop from asteroid to
+   asteroid (they pull on you), use the green crystals to chain dashes,
+   and leave through the top to roll the credits
  - A built-in level editor (F2) to add your own strawberries, crystals
    and platforms
 
@@ -110,6 +114,8 @@ Extras:
    InfiniteStamina assist mode
    GripTime        seconds she can hang on a wall (0 = Celeste's ~11 s)
    SlipAngle       slopes this steep can't be stood on (0 = off)
+   SpaceGravity    gravity in the space ending (0.05; 0 = the original
+                   zero-g)
    EdgeSupport     slide off rock corners you're barely standing on
                    (0 = off)
    LedgeSpacing    wooden ledges on tall walls (0 = off)

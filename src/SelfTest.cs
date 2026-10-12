@@ -156,6 +156,53 @@ namespace CelesteOverIt
             log.LogInfo("[tour] done");
         }
 
+        /// <summary>Dev: put Madeline just above the antenna, dash straight up and follow her into the ending.</summary>
+        public static void AttachEnding(MadelineController c, ManualLogSource log)
+        {
+            string dir = Path.Combine(Paths.BepInExRootPath, "CelesteOverIt_test");
+            Directory.CreateDirectory(dir);
+            c.Input.Script = step =>
+            {
+                var f = new CelesteInput.ScriptedFrame();
+                // A) antenna -> crystals -> ledge by the first asteroid
+                if (step == 30) c.TeleportTo(new Vector2(62.14f, 358.4f));   // standing on top of the antenna
+                if (step == 90)
+                    log.LogInfo("[ending] A: standing on antenna: ground " + c.M.OnGround + " slipping " + c.M.Slipping + " feet " + c.PxToWorld(c.M.X, c.M.Y));
+                if (step >= 100 && step < 116) f.Jump = true;
+                if (step >= 100 && step < 520)
+                {
+                    f.Y = -1;
+                    // dash right after the jump, and again whenever a crystal has given the dash back
+                    if (step >= 112 && (step - 112) % 24 < 2) f.Dash = true;
+                }
+                if (step == 620)
+                    log.LogInfo("[ending] A result: feet " + c.PxToWorld(c.M.X, c.M.Y) + " ground " + c.M.OnGround);
+                // B) from the highest asteroid's top, a jump + dash should leave space and roll the credits
+                if (step == 640) c.TeleportTo(new Vector2(42.5f, 452.5f));
+                if (step == 740)
+                    log.LogInfo("[ending] B: on top asteroid: ground " + c.M.OnGround + " feet " + c.PxToWorld(c.M.X, c.M.Y));
+                if (step >= 750 && step < 766) f.Jump = true;
+                if (step >= 750 && step < 1100)
+                {
+                    f.Y = -1;
+                    if (step >= 762 && (step - 762) % 24 < 2) f.Dash = true;
+                }
+                return f;
+            };
+            c.OnStep = ctl =>
+            {
+                int s = ctl.StepCount;
+                if (s % 30 == 0 && s >= 30 && s <= 1300)
+                {
+                    var feet = ctl.PxToWorld(ctl.M.X, ctl.M.Y);
+                    log.LogInfo("[ending] t=" + (s / 60) + "s feet " + feet + " speed " + ctl.M.Speed + " gravityScale " + ctl.M.GravityScale.ToString("0.00") +
+                                " accel " + ctl.M.ExternalAccel + " physicsGravity " + Physics2D.gravity);
+                }
+                if (s == 90 || s == 600 || s == 1500 || s == 2400 || s == 3000)
+                    ScreenCapture.CaptureScreenshot(Path.Combine(dir, "ending" + s.ToString("0000") + ".png"));
+            };
+        }
+
         public static void Attach(MadelineController c, ManualLogSource log)
         {
             string dir = Path.Combine(Paths.BepInExRootPath, "CelesteOverIt_test");
