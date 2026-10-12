@@ -1,0 +1,162 @@
+=====================================================================
+  CELESTE OVER IT  -  Madeline climbs Getting Over It's mountain
+  v1.0.0
+=====================================================================
+
+Diogenes is replaced by Madeline from Celeste, with Celeste's own movement:
+run, variable jump, coyote time, 8-way dash with freeze frames, wall jumps,
+climbing with stamina, super/hyper jumps, wavedashes and corner corrections.
+Her sprites, animations, hair and sound effects are loaded from YOUR OWN
+copy of Celeste while the game runs. No game files are included in this
+download.
+
+Extras:
+ - Madeline's real Celeste sound effects
+ - She slides off rock that's too steep (75 degrees or more) and off corners
+   she's only just teetering on, so bad landings cost you
+ - She can grip a wall for 3 seconds before she starts slipping down it
+ - Climbing follows slanted rock faces, and she tilts to match the wall
+ - Celeste wooden ledges are added to very tall walls
+ - 5 hidden strawberries in the sky, plus green dash-refill crystals
+ - A built-in level editor (F2) to add your own strawberries, crystals
+   and platforms
+
+
+---------------------------------------------------------------------
+ REQUIREMENTS
+---------------------------------------------------------------------
+ - Windows
+ - Getting Over It with Bennett Foddy (PC, Steam version)
+ - Celeste (PC) installed on the same computer. Steam, Epic and itch
+   are all fine. Celeste only needs to be installed; it doesn't need
+   to be running.
+
+
+---------------------------------------------------------------------
+ INSTALL
+---------------------------------------------------------------------
+ 1. Find your Getting Over It folder.
+    Steam: right-click Getting Over It > Manage > Browse local files.
+    It's the folder that contains GettingOverIt.exe.
+
+ 2. Extract EVERYTHING from this zip into that folder, so that
+    winhttp.dll and the BepInEx folder sit next to GettingOverIt.exe:
+
+        Getting Over It\
+            GettingOverIt.exe
+            winhttp.dll                      <- from this zip
+            doorstop_config.ini              <- from this zip
+            BepInEx\                         <- from this zip
+                plugins\CelesteOverIt\CelesteOverIt.dll
+                ...
+
+    (This zip includes BepInEx 5, the mod loader. If you already have
+     BepInEx 5 x64 installed, you only need
+     BepInEx\plugins\CelesteOverIt.)
+
+ 3. Start Getting Over It and choose New Game or Continue.
+    Madeline appears once the intro ends. The first start takes a few
+    seconds longer while BepInEx sets itself up.
+
+ If Celeste isn't found automatically, open
+     BepInEx\config\celesteoverit.madeline.cfg
+ (it's created on the first start) and set
+     CelesteDirectory = C:\path\to\your\Celeste
+ i.e. the folder that contains Celeste.exe.
+
+
+---------------------------------------------------------------------
+ CONTROLS
+---------------------------------------------------------------------
+   Move ............ Arrow keys / WASD / left stick
+   Jump ............ C or Space / A
+   Dash ............ X or Left Shift or K / X or B
+   Grab / climb .... Z or V or Left Ctrl or J / LB or RB
+   Respawn ......... F5 (at your last safe spot; press again to go
+                     further back) / Back
+   Back to start ... Shift + F5
+   Help ............ F1      Level editor ... F2
+   Debug info ...... F3      Strawberries ... hold Tab
+
+ All keys can be changed in the config file.
+
+ Strawberries: touch one, then land on solid ground to collect it,
+ just like in Celeste. Green crystals refill your dash and grip.
+
+
+---------------------------------------------------------------------
+ LEVEL EDITOR (F2)
+---------------------------------------------------------------------
+   1 / 2 / 3 ....... tool: strawberry / dash crystal / wooden platform
+   Mouse wheel ..... platform width
+   Left click ...... place          Right click ... delete
+   T ............... teleport Madeline to the mouse
+   Arrows / WASD ... move the camera (Shift = faster)
+   Q / E ........... zoom
+   Ctrl + R ........ reset collected strawberries
+   F2 .............. back to playing
+
+ Your level is saved to BepInEx\config\CelesteOverIt_level.txt. It's a
+ plain text file you can share or edit by hand. Delete it to get the
+ original 5 strawberries back.
+
+
+---------------------------------------------------------------------
+ SETTINGS  (BepInEx\config\celesteoverit.madeline.cfg)
+---------------------------------------------------------------------
+   PixelSize       Madeline's size (0.075 default, 0.125 = Diogenes-sized)
+   CameraZoom      how far the camera zooms out (1 = normal)
+   MaxDashes       1, or 2 for pink-hair double dash
+   InfiniteStamina assist mode
+   GripTime        seconds she can hang on a wall (0 = Celeste's ~11 s)
+   SlipAngle       slopes this steep can't be stood on (0 = off)
+   EdgeSupport     slide off rock corners you're barely standing on
+                   (0 = off)
+   LedgeSpacing    wooden ledges on tall walls (0 = off)
+   Sound Enabled / Volume / SurfaceIndex
+   General Enabled = false   brings Diogenes back
+
+
+---------------------------------------------------------------------
+ TROUBLESHOOTING
+---------------------------------------------------------------------
+ * Nothing changes, Diogenes is still there
+   - Check that winhttp.dll is next to GettingOverIt.exe.
+   - Look at BepInEx\LogOutput.log. If there's no LogOutput.log at all,
+     check whether GettingOverIt_Data\Managed contains files named
+     "Copy1_....dll". Some copies of the game have these duplicates, and
+     they stop BepInEx from loading. Move them into a different folder
+     (don't leave them in Managed).
+
+ * Red text "Couldn't find Celeste"
+   - Set CelesteDirectory in the config (see INSTALL above).
+
+ * No sound
+   - Your antivirus may have blocked CelesteAudioHost.exe or
+     CelesteAudioHost64.exe (in BepInEx\plugins\CelesteOverIt). These
+     small helper programs play Celeste's sounds using Celeste's own
+     audio engine. Allow them, or set Sound > Enabled = false.
+
+ * Stuck inside a rock, or fell out of the world
+   - Press F5. It usually fixes itself within a moment.
+
+
+---------------------------------------------------------------------
+ UNINSTALL
+---------------------------------------------------------------------
+ Delete winhttp.dll, doorstop_config.ini, .doorstop_version and the
+ BepInEx folder from your Getting Over It folder. Or, to keep BepInEx,
+ just delete BepInEx\plugins\CelesteOverIt.
+
+
+---------------------------------------------------------------------
+ CREDITS
+---------------------------------------------------------------------
+ Mod by mohamad-boop.
+ Source code: https://github.com/mohamad-boop/CelesteOverIt
+
+ Celeste (c) Maddy Makes Games / Extremely OK Games. Getting Over It
+ with Bennett Foddy (c) Bennett Foddy. This is an unofficial fan mod, not
+ affiliated with either. It contains no game assets: everything of
+ Celeste's is read from your own installed copy.
+ BepInEx (LGPL-2.1) - https://github.com/BepInEx/BepInEx
