@@ -8,7 +8,7 @@ using UnityEngine.SceneManagement;
 
 namespace CelesteOverIt
 {
-    [BepInPlugin("celesteoverit.madeline", "Celeste Over It", "1.1.0")]
+    [BepInPlugin("celesteoverit.madeline", "Celeste Over It", "1.2.0")]
     public class Plugin : BaseUnityPlugin
     {
         const BindingFlags All = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
@@ -17,7 +17,7 @@ namespace CelesteOverIt
         float devLogTimer;
         bool continuing;
         ConfigEntry<string> celesteDir, keyRespawn, keyJump, keyDash, keyGrab, keyLeft, keyRight, keyUp, keyDown;
-        ConfigEntry<float> pixelSize, zOffset, cameraZoom, sfxVolume, slipAngle, gripTime, spaceGravity;
+        ConfigEntry<float> pixelSize, zOffset, cameraZoom, sfxVolume, slipAngle, gripTime, spaceGravity, snakeDrop;
         ConfigEntry<int> edgeSupport, maxDashes, slopeStep, ledgeStep, climbContour, ledgeSpacing, surfaceIndex;
         ConfigEntry<bool> sound;
         static CelesteAudio audio;
@@ -40,8 +40,10 @@ namespace CelesteOverIt
                 "Bumps/lips up to this many pixels are walked over when there's level ground behind them.");
             climbContour = Config.Bind("Gameplay", "ClimbContour", 2,
                 "While climbing, Madeline follows a rock face that leans up to this many pixels per pixel climbed (0 = pure Celeste).");
-            spaceGravity = Config.Bind("Gameplay", "SpaceGravity", 0.05f,
-                "Gravity in the space section above the antenna, as a fraction of normal (0.05 = hop asteroid to asteroid; 0 = Getting Over It's own zero-g).");
+            snakeDrop = Config.Bind("Gameplay", "SnakeDrop", 1.0f,
+                "Lower the snake by this many world units so Madeline can slip between its head and the boulder above (0 = original position).");
+            spaceGravity = Config.Bind("Gameplay", "SpaceGravity", 0.08f,
+                "Gravity in the space section above the antenna, as a fraction of normal (0.08 = hop asteroid to asteroid; 0 = Getting Over It's own zero-g).");
             gripTime = Config.Bind("Gameplay", "GripTime", 3f,
                 "Seconds Madeline can hold onto a wall before she runs out of grip and slides down (0 = Celeste's normal stamina, about 11s).");
             edgeSupport = Config.Bind("Gameplay", "EdgeSupport", 2,
@@ -134,8 +136,35 @@ namespace CelesteOverIt
             }
         }
 
+        /// <summary>
+        /// Lower the snake (the long serpent up the left side of the mountain) a little, so the gap between its
+        /// head and the boulder above is tall enough for Madeline to slip through.
+        /// </summary>
+        void LowerSnake()
+        {
+            if (snakeDrop.Value <= 0f) return;
+            foreach (var col in FindObjectsOfType<Collider2D>())
+            {
+                if (col.isTrigger || col.name != "Snake") continue;
+                var t = col.transform;
+                // Move the object carrying the visible model too, so what you see matches what she stands on.
+                var mover = t.GetComponentInChildren<Renderer>(true) != null || t.parent == null ? t : t.parent;
+                mover.position += Vector3.down * snakeDrop.Value;
+                Physics2D.SyncTransforms();
+                // Statically-batched pieces of the model don't follow their transform: redraw them lowered.
+                var offset = new GameObject("CelesteOverIt_SnakeVisual").AddComponent<StaticMeshOffset>();
+                int baked = offset.Capture(mover, Vector3.down * snakeDrop.Value);
+                Logger.LogInfo("Lowered '" + mover.name + "' by " + snakeDrop.Value + " (renderers: " +
+                    mover.GetComponentsInChildren<Renderer>(true).Length + ", statically batched and redrawn: " + baked +
+                    ", snake now spans y " + col.bounds.min.y.ToString("0.0") + " - " + col.bounds.max.y.ToString("0.0") + ")");
+                return;
+            }
+            Logger.LogWarning("Snake not found; not lowered");
+        }
+
         void Spawn(MonoBehaviour pc)
         {
+            LowerSnake();
             var player = pc.gameObject;
             var rb = player.GetComponent<Rigidbody2D>();
 

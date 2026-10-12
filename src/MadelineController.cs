@@ -430,7 +430,7 @@ namespace CelesteOverIt
         }
 
         /// <summary>Copy GOI's current gravity (and the asteroid pull while in space) onto Madeline.</summary>
-        public float SpaceGravity = 0.05f;   // fraction of normal gravity inside GOI's space zone (GOI itself uses 0)
+        public float SpaceGravity = 0.08f;   // fraction of normal gravity inside GOI's space zone (GOI itself uses 0)
 
         void ApplyGoiGravity()
         {

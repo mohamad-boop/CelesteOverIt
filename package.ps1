@@ -6,7 +6,7 @@ param(
     [string]$GameDir = $env:GOI_DIR,
     [Parameter(Mandatory = $true)][string]$BepInExZip,
     [string]$OutDir = "",
-    [string]$Version = "1.1.0"
+    [string]$Version = "1.2.0"
 )
 $ErrorActionPreference = "Stop"
 $here = Split-Path -Parent $MyInvocation.MyCommand.Path

@@ -13,49 +13,62 @@ namespace CelesteOverIt
     /// </summary>
     public class Level : MonoBehaviour
     {
-        // Five strawberries of our own, in the sky the hammer could never reach. World units.
+        // Nine strawberries in places the hammer could never reach, with crystals and platforms. World units.
         const string DefaultLevel =
 @"# Celeste Over It - level additions, in Getting Over It world units. Edit in-game with F2.
 #   platform <centerX> <topY> <width in 8px tiles>
 #   refill <x> <y>
 #   strawberry <id> <x> <y>
 
-# 1  Sky ladder above the starting shelf
-platform -36.0 -2.1 3
-platform -40.0 -0.3 3
+# Sky ladder above the starting shelf
+platform -36 -2.1 3
+platform -40 -0.3 3
 platform -36.5 1.5 2
-refill -40.0 4.0
-strawberry 1 -44.0 6.5
+refill -40 4
+strawberry 1 -44 6.5
 
-# 2  Double dash off the top of the big boulder
-refill -11.0 11.5
+# Double dash off the top of the big boulder
+refill -11 11.5
 strawberry 2 -7.5 14.5
 
-# 3  Out over the empty bowl, left of the first slope
-platform 1.5 16.0 3
+# Out over the empty bowl, left of the first slope
+platform 1.5 16 3
 platform -2.5 17.8 2
 refill -6.5 20.5
-platform -10.5 22.0 2
-strawberry 3 -14.0 25.5
+platform -10.5 22 2
+strawberry 3 -14 25.5
 
-# 4  Floating off the left of the cliff
-platform 11.0 58.0 3
-platform 7.0 60.5 2
+# Floating off the left of the cliff
+platform 11 58 3
+platform 7 60.5 2
 strawberry 4 4.5 63.5
+
+# Above the big block
+platform 30 83.4 3
+platform 34.5 85.3 2
+refill 31 88
+strawberry 5 27 91
+refill 35.55 106.8
+refill 29.03 107.48
+
+# Up the left wall of the snowy area
+platform -0.3 292.88 3
+platform -5.03 320.55 3
+platform -3.45 330.68 3
+strawberry 6 -13.95 348.68
+
+# Snowy area extras
+strawberry 7 71.55 308.48
+strawberry 8 106.35 367.65
+strawberry 9 5.18 265.35
 
 # Space: crystals and a ledge from the antenna to the first asteroid, one between the
 # upper asteroids, and one above the last asteroid to dash out to the ending
-refill 62.4 374
-refill 62.6 388
-platform 63.0 397 3
-refill 63.0 452
-refill 42.5 461
-
-# 5  Above the big block
-platform 30.0 83.4 3
-platform 34.5 85.3 2
-refill 31.0 88.0
-strawberry 5 27.0 91.0
+refill 62.33 374.7
+refill 62.8 389.5
+platform 63 397 3
+refill 63 452
+refill 42.98 463.35
 ";
 
         class Item

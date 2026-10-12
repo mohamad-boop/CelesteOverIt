@@ -1,6 +1,6 @@
 =====================================================================
   CELESTE OVER IT  -  Madeline climbs Getting Over It's mountain
-  v1.1.0
+  v1.2.0
 =====================================================================
 
 Diogenes is replaced by Madeline from Celeste, with Celeste's own movement:
@@ -17,7 +17,10 @@ Extras:
  - She can grip a wall for 3 seconds before she starts slipping down it
  - Climbing follows slanted rock faces, and she tilts to match the wall
  - Celeste wooden ledges are added to very tall walls
- - 5 hidden strawberries in the sky, plus green dash-refill crystals
+ - 9 hidden strawberries in places the hammer can't reach, plus green
+   dash-refill crystals and extra platforms
+ - The snake is lowered slightly so Madeline can slip between its head and
+   the boulder above it
  - The real ending works: climb the antenna at the top of the snowy area,
    then jump into the low-gravity space above it. Hop from asteroid to
    asteroid (they pull on you), use the green crystals to chain dashes,
@@ -102,7 +105,7 @@ Extras:
 
  Your level is saved to BepInEx\config\CelesteOverIt_level.txt. It's a
  plain text file you can share or edit by hand. Delete it to get the
- original 5 strawberries back.
+ original 9 strawberries back.
 
 
 ---------------------------------------------------------------------
@@ -114,8 +117,9 @@ Extras:
    InfiniteStamina assist mode
    GripTime        seconds she can hang on a wall (0 = Celeste's ~11 s)
    SlipAngle       slopes this steep can't be stood on (0 = off)
-   SpaceGravity    gravity in the space ending (0.05; 0 = the original
+   SpaceGravity    gravity in the space ending (0.08; 0 = the original
                    zero-g)
+   SnakeDrop       how far the snake is lowered (1; 0 = original spot)
    EdgeSupport     slide off rock corners you're barely standing on
                    (0 = off)
    LedgeSpacing    wooden ledges on tall walls (0 = off)

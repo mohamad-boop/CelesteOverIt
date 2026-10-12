@@ -19,8 +19,9 @@ Madeline's sprites, animations, hair and sound effects are loaded **at runtime f
   - Rock steeper than 75°, and corners she's barely balanced on, make her slide off.
   - She can grip a wall for 3 seconds before she slips.
   - Very tall walls get Celeste wooden ledges.
-- **Strawberries and dash-refill crystals**: 5 hidden strawberries, plus a **level editor (F2)** to place your own strawberries, crystals and platforms.
-- **The real ending**: jump off the antenna into the space above it. Getting Over It turns gravity off there; Madeline keeps a little (`SpaceGravity`, 5%), so you hop from asteroid to asteroid. The asteroids pull on her the same way they pull on Diogenes, and green crystals let you chain dashes. Leave through the top to roll the credits.
+- **Strawberries and dash-refill crystals**: 9 hidden strawberries with their own platforms and crystals, plus a **level editor (F2)** to place your own.
+- **The snake is lowered a little** (`SnakeDrop`) so Madeline can slip between its head and the boulder above. The scenery is statically batched, so the mod hides the snake's baked meshes and redraws them at the new height.
+- **The real ending**: jump off the antenna into the space above it. Getting Over It turns gravity off there; Madeline keeps a little (`SpaceGravity`, 8%), so you hop from asteroid to asteroid. The asteroids pull on her the same way they pull on Diogenes, and green crystals let you chain dashes. Leave through the top to roll the credits.
 - **Getting Over It still works around her**: its camera, autosave/continue, progress meter and narrator all keep working. The original player body is kept (kinematic) and follows Madeline.
 - **Respawn**: F5 takes you to the last safe spot, Shift+F5 to the start. Getting stuck inside rock fixes itself automatically.
 
